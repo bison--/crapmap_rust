@@ -49,7 +49,6 @@ pub fn read_crapmap_transparent(filename: &str, transparent_color: [u8; 4]) -> i
         for _ in 0..width {
             let pixel = f.read_u8()?;
             if pixel == 0x00 {
-                // transparent is the background color
                 image_row.push((
                     transparent_color[0],
                     transparent_color[1],
