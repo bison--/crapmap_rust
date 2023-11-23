@@ -3,9 +3,13 @@ use std::fs::File;
 use std::io::{self, Read};
 use byteorder::{ReadBytesExt};
 
-use crate::draw;
+pub(crate) const BACKGROUND_COLOR: [u8; 4] = [111, 111, 111, 254];
 
 pub fn read_crapmap(filename: &str) -> io::Result<Vec<Vec<(u8, u8, u8, u8)>>> {
+    read_crapmap_transparent(filename, BACKGROUND_COLOR)
+}
+
+pub fn read_crapmap_transparent(filename: &str, transparent_color: [u8; 4]) -> io::Result<Vec<Vec<(u8, u8, u8, u8)>>> {
     let mut f = File::open(filename)?;
 
     // Read and check magic bytes
@@ -47,10 +51,10 @@ pub fn read_crapmap(filename: &str) -> io::Result<Vec<Vec<(u8, u8, u8, u8)>>> {
             if pixel == 0x00 {
                 // transparent is the background color
                 image_row.push((
-                    draw::BACKGROUND_COLOR[0],
-                    draw::BACKGROUND_COLOR[1],
-                    draw::BACKGROUND_COLOR[2],
-                    draw::BACKGROUND_COLOR[3]
+                    transparent_color[0],
+                    transparent_color[1],
+                    transparent_color[2],
+                    transparent_color[3]
                 ));
             } else if (1..=color_table.len() as u8).contains(&pixel) {
                 let color = color_table[(pixel - 1) as usize];

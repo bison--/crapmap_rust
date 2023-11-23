@@ -1,6 +1,6 @@
 use pixels::Pixels;
 
-pub(crate) const BACKGROUND_COLOR: [u8; 4] = [111, 111, 111, 254];
+use crate::read_crapmap;
 
 pub fn draw(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut Pixels, width: u32, _height: u32) {
     let frame = pixels.get_frame_mut();
@@ -26,7 +26,7 @@ pub fn draw_scaled(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut Pixels,
 
     // Set the entire frame
     for pixel in frame.chunks_exact_mut(4) {
-        pixel.copy_from_slice(&BACKGROUND_COLOR); // RGBA
+        pixel.copy_from_slice(&read_crapmap::BACKGROUND_COLOR); // RGBA
     }
 
     let image_width = image_data[0].len() as usize;
@@ -68,7 +68,7 @@ pub fn draw_scaled_chatgpt(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut
 
     // Set the entire frame
     for pixel in frame.chunks_exact_mut(4) {
-        pixel.copy_from_slice(&BACKGROUND_COLOR); // RGBA
+        pixel.copy_from_slice(&read_crapmap::BACKGROUND_COLOR); // RGBA
     }
 
     // Handle empty image data
@@ -114,10 +114,10 @@ pub fn draw_scaled_chatgpt(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut
 
                 } else {
                     // Set pixel to default if it's outside the scaled image area
-                    frame[pixel_index] = BACKGROUND_COLOR[0];
-                    frame[pixel_index + 1] = BACKGROUND_COLOR[1];
-                    frame[pixel_index + 2] = BACKGROUND_COLOR[2];
-                    frame[pixel_index + 3] = BACKGROUND_COLOR[3];
+                    frame[pixel_index] = read_crapmap::BACKGROUND_COLOR[0];
+                    frame[pixel_index + 1] = read_crapmap::BACKGROUND_COLOR[1];
+                    frame[pixel_index + 2] = read_crapmap::BACKGROUND_COLOR[2];
+                    frame[pixel_index + 3] = read_crapmap::BACKGROUND_COLOR[3];
                 }
             }
         }
