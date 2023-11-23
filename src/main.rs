@@ -1,4 +1,6 @@
 // main.rs
+#![windows_subsystem = "windows"]
+
 use winit::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -39,7 +41,7 @@ fn main() {
     let mut pixels: Pixels = Pixels::new(window_size.width, window_size.height, surface_texture)
         .expect("Failed to create pixels context");
 
-    println!("{}x{}", window_size.width.to_string(), window_size.height.to_string());
+    //println!("{}x{}", window_size.width.to_string(), window_size.height.to_string());
 
     event_loop.run(move |event, _, control_flow| {
         match event {
@@ -69,7 +71,7 @@ fn main() {
                     return;
                 }
 
-                println!("redraw {}x{}", window_size.width, window_size.height);
+                //println!("redraw {}x{}", window_size.width, window_size.height);
             }
 
             Event::MainEventsCleared => {
