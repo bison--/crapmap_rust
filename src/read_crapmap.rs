@@ -1,7 +1,9 @@
 // read_crapmap.rs
 use std::fs::File;
 use std::io::{self, Read};
-use byteorder::{ReadBytesExt, BigEndian};
+use byteorder::{ReadBytesExt};
+
+use crate::draw;
 
 pub fn read_crapmap(filename: &str) -> io::Result<Vec<Vec<(u8, u8, u8, u8)>>> {
     let mut f = File::open(filename)?;
@@ -39,11 +41,17 @@ pub fn read_crapmap(filename: &str) -> io::Result<Vec<Vec<(u8, u8, u8, u8)>>> {
     // Read pixel data
     let mut image_data = Vec::new();
     for _ in 0..height {
-        let mut image_row = Vec::new();
+        let mut image_row: Vec<(u8, u8, u8, u8)> = Vec::new();
         for _ in 0..width {
             let pixel = f.read_u8()?;
             if pixel == 0x00 {
-                image_row.push((255, 255, 255, 0));
+                // transparent is the background color
+                image_row.push((
+                    draw::BACKGROUND_COLOR[0],
+                    draw::BACKGROUND_COLOR[1],
+                    draw::BACKGROUND_COLOR[2],
+                    draw::BACKGROUND_COLOR[3]
+                ));
             } else if (1..=color_table.len() as u8).contains(&pixel) {
                 let color = color_table[(pixel - 1) as usize];
                 image_row.push((color.0, color.1, color.2, 255));

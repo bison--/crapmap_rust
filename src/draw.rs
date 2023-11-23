@@ -1,12 +1,14 @@
 use pixels::Pixels;
-use image::{GenericImageView, DynamicImage, RgbaImage};
 
-pub fn draw(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut Pixels, width: u32, height: u32) {
-    let mut frame = pixels.get_frame_mut();
+pub(crate) const BACKGROUND_COLOR: [u8; 4] = [111, 111, 111, 254];
+
+pub fn draw(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut Pixels, width: u32, _height: u32) {
+    let frame = pixels.get_frame_mut();
 
     for (y, row) in image_data.iter().enumerate() {
         for (x, &(r, g, b, a)) in row.iter().enumerate() {
             let pixel_index = (y * width as usize + x) * 4;
+
             if pixel_index < frame.len() {
                 frame[pixel_index] = r;
                 frame[pixel_index + 1] = g;
@@ -20,11 +22,53 @@ pub fn draw(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut Pixels, width:
 }
 
 pub fn draw_scaled(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut Pixels, window_width: u32, window_height: u32) {
-    let mut frame = pixels.get_frame_mut();
+    let frame = pixels.get_frame_mut();
 
-    // Set the entire frame to black
+    // Set the entire frame
     for pixel in frame.chunks_exact_mut(4) {
-        pixel.copy_from_slice(&[0, 0, 0, 255]); // RGBA for black
+        pixel.copy_from_slice(&BACKGROUND_COLOR); // RGBA
+    }
+
+    let image_width = image_data[0].len() as usize;
+    let image_height = image_data.len() as usize;
+
+    // Calculate scale factors while maintaining aspect ratio
+    let scale = (window_width as f32 / image_width as f32)
+        .min(window_height as f32 / image_height as f32) as usize;
+
+    // Calculate the new image dimensions
+    let scaled_width = (image_width * scale) as u32;
+    let scaled_height = (image_height * scale) as u32;
+
+    for y in 0..scaled_height {
+        for x in 0..scaled_width {
+            let pixel_index = (y as usize * window_width as usize + x as usize) * 4;
+
+            // Ensure the pixel index is within the frame buffer
+            if pixel_index + 3 < frame.len() {
+                // Determine which pixel in the original image corresponds to this pixel
+                let src_x = (x as f32 / window_width as f32 * image_width as f32) as usize;
+                let src_y = (y as f32 / window_height as f32 * image_height as f32) as usize;
+
+                let (r, g, b, a) = image_data[src_y][src_x];
+
+                frame[pixel_index] = r;
+                frame[pixel_index + 1] = g;
+                frame[pixel_index + 2] = b;
+                frame[pixel_index + 3] = a;
+            }
+        }
+    }
+
+    pixels.render().expect("Failed to render pixels");
+}
+
+pub fn draw_scaled_chatgpt(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut Pixels, window_width: u32, window_height: u32) {
+    let frame = pixels.get_frame_mut();
+
+    // Set the entire frame
+    for pixel in frame.chunks_exact_mut(4) {
+        pixel.copy_from_slice(&BACKGROUND_COLOR); // RGBA
     }
 
     // Handle empty image data
@@ -67,12 +111,13 @@ pub fn draw_scaled(image_data: &Vec<Vec<(u8, u8, u8, u8)>>, pixels: &mut Pixels,
                     frame[pixel_index + 1] = g;
                     frame[pixel_index + 2] = b;
                     frame[pixel_index + 3] = a;
+
                 } else {
-                    // Set pixel to black if it's outside the scaled image area
-                    frame[pixel_index] = 0;
-                    frame[pixel_index + 1] = 0;
-                    frame[pixel_index + 2] = 0;
-                    frame[pixel_index + 3] = 255;
+                    // Set pixel to default if it's outside the scaled image area
+                    frame[pixel_index] = BACKGROUND_COLOR[0];
+                    frame[pixel_index + 1] = BACKGROUND_COLOR[1];
+                    frame[pixel_index + 2] = BACKGROUND_COLOR[2];
+                    frame[pixel_index + 3] = BACKGROUND_COLOR[3];
                 }
             }
         }
